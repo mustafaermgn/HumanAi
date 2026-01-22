@@ -15,3 +15,11 @@ class DataCleaner:
 
     def compact_blank_lines(self, code: str) -> str:
         return re.sub(r"\n\s*\n+", "\n", code)
+
+    def validate_code(self, code: str) -> bool:
+        if not isinstance(code, str):
+            return False
+        if len(code.strip()) < 10:
+            return False
+        tokens = {"def", "class", "import", "return", "if", "for", "while", "{"}
+        return any(token in code for token in tokens)
