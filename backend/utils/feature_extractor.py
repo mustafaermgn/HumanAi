@@ -2,4 +2,18 @@ class FeatureExtractor:
     def extract_features(self, code: str) -> dict:
         if not isinstance(code, str):
             return {}
-        return {"length": len(code)}
+        features = {"length": len(code)}
+        features.update(self.text_features(code))
+        return features
+
+    def text_features(self, code: str) -> dict:
+        lines = code.splitlines()
+        line_count = max(len(lines), 1)
+        avg_line_length = sum(len(line) for line in lines) / line_count
+        alpha_chars = sum(char.isalpha() for char in code)
+        alpha_ratio = alpha_chars / max(len(code), 1)
+        return {
+            "line_count": line_count,
+            "avg_line_length": avg_line_length,
+            "alpha_ratio": alpha_ratio,
+        }
