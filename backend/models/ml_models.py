@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Dict, Tuple
 
+import joblib
 import numpy as np
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier
@@ -51,6 +52,7 @@ class MLModelManager:
             model.train(features, targets)
             summaries[name] = (features.shape[0], features.shape[1])
             self.training_history.append(name)
+            self.save_model(name)
         return summaries
 
     def _prepare_training_data(self, features, targets, n_samples):
@@ -75,3 +77,24 @@ class MLModelManager:
             name: model.predict(features)
             for name, model in self.models.items()
         }
+
+    def save_model(self, name: str) -> Path:
+        model = self.get_model(name)
+        destination = self.storage_dir / f"{name}.joblib"
+        joblib.dump(model.estimator, destination)
+        return destination
+
+    def load_model(self, name: str) -> bool:
+        destination = self.storage_dir / f"{name}.joblib"
+        if not destination.exists():
+            return False
+        loaded = joblib.load(destination)
+        self.models[name].estimator = loaded
+        self.models[name].trained = True
+        return True
+
+    def save_all(self) -> Dict[str, Path]:
+        return {name: self.save_model(name) for name in self.models}
+
+    def load_all(self) -> Dict[str, bool]:
+        return {name: self.load_model(name) for name in self.models}
