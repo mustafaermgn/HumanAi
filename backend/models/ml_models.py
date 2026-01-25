@@ -1,7 +1,8 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Tuple
 
 import numpy as np
+from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
@@ -33,6 +34,7 @@ class MLModelManager:
         self.storage_dir.mkdir(parents=True, exist_ok=True)
         self.models: Dict[str, MLModel] = {}
         self._register_defaults()
+        self.training_history = []
 
     def _register_defaults(self):
         self.register_model("random_forest", RandomForestClassifier(n_estimators=50, random_state=42))
@@ -41,6 +43,29 @@ class MLModelManager:
 
     def register_model(self, name: str, estimator):
         self.models[name] = MLModel(name, estimator)
+
+    def train_models(self, features=None, targets=None, n_samples=400) -> Dict[str, Tuple[int, int]]:
+        features, targets = self._prepare_training_data(features, targets, n_samples)
+        summaries = {}
+        for name, model in self.models.items():
+            model.train(features, targets)
+            summaries[name] = (features.shape[0], features.shape[1])
+            self.training_history.append(name)
+        return summaries
+
+    def _prepare_training_data(self, features, targets, n_samples):
+        if features is None or targets is None:
+            features, targets = self._generate_baseline_dataset(n_samples)
+        return np.asarray(features, dtype=float), np.asarray(targets)
+
+    def _generate_baseline_dataset(self, n_samples):
+        return make_classification(
+            n_samples=n_samples,
+            n_features=12,
+            n_informative=6,
+            n_redundant=2,
+            random_state=42,
+        )
 
     def get_model(self, name: str) -> MLModel:
         return self.models[name]
