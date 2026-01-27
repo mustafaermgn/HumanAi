@@ -1,4 +1,4 @@
-from models.ml_models import MLModelManager
+from backend.models.ml_models import MLModelManager
 
 
 def test_train_models_records_history(tmp_path):
