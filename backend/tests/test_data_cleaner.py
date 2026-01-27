@@ -1,4 +1,4 @@
-from utils.data_cleaner import DataCleaner
+from backend.utils.data_cleaner import DataCleaner
 
 
 def test_clean_code_strips_and_normalizes():

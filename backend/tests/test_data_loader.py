@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from utils.data_loader import DataLoader
+from backend.utils.data_loader import DataLoader
 
 
 def test_load_dataset(tmp_path):

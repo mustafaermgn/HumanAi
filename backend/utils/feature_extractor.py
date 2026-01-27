@@ -1,4 +1,13 @@
 class FeatureExtractor:
+    FEATURE_KEYS = [
+        "length",
+        "line_count",
+        "avg_line_length",
+        "alpha_ratio",
+        "digit_ratio",
+        "symbol_ratio",
+    ]
+
     def extract_features(self, code: str) -> dict:
         if not isinstance(code, str):
             return {}
@@ -27,3 +36,6 @@ class FeatureExtractor:
             "digit_ratio": digit_count / length,
             "symbol_ratio": symbol_count / length,
         }
+
+    def vectorize(self, feature_map: dict) -> list[float]:
+        return [float(feature_map.get(key, 0.0)) for key in self.FEATURE_KEYS]

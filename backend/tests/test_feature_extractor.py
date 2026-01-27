@@ -1,4 +1,4 @@
-from utils.feature_extractor import FeatureExtractor
+from backend.utils.feature_extractor import FeatureExtractor
 
 
 def test_extract_features_includes_text_and_numeric():

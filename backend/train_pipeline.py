@@ -1,10 +1,10 @@
 import argparse
 from pathlib import Path
 
-from models.ml_models import MLModelManager
-from utils.data_cleaner import DataCleaner
-from utils.feature_extractor import FeatureExtractor
-from utils.data_loader import DataLoader
+from backend.models.ml_models import MLModelManager
+from backend.utils.data_cleaner import DataCleaner
+from backend.utils.feature_extractor import FeatureExtractor
+from backend.utils.data_loader import DataLoader
 
 
 def run_training(data_dir: Path, model_storage: Path):
@@ -14,9 +14,18 @@ def run_training(data_dir: Path, model_storage: Path):
     manager = MLModelManager(storage_dir=model_storage)
 
     codes, labels = loader.load_dataset()
-    cleaned = [cleaner.clean_code(code) for code in codes if cleaner.validate_code(code)]
-    features = [extractor.extract_features(code) for code in cleaned]
-    manager.train_models(features, labels[: len(features)])
+    pairs = []
+    for code, label in zip(codes, labels):
+        if cleaner.validate_code(code):
+            pairs.append((cleaner.clean_code(code), label))
+
+    if not pairs:
+        raise ValueError("Gecerli kod bulunamadi.")
+
+    vectors = [
+        extractor.vectorize(extractor.extract_features(clean_code)) for clean_code, _ in pairs
+    ]
+    manager.train_models(vectors, [label for _, label in pairs])
     manager.save_all()
     return manager.training_history
 
